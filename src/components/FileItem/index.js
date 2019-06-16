@@ -12,7 +12,7 @@ const FileItem = (props) => {
                 </div>
                 <div className="name-wrapper">
                     <div className="name">{props.name}</div>
-                    <div className="description">Nam vel porta velit </div>
+                    <div className="description">{props.type} </div>
                 </div>
             </div>
         </div>

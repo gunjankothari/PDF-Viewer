@@ -1,8 +1,7 @@
 import React,{PureComponent}  from 'react';
-import {Document, Page } from "react-pdf/dist/entry.webpack";
+import { Document, Page } from "react-pdf/dist/entry.webpack";
 
 import './index.scss';
-
 
 class PDFViewer extends PureComponent {
     state = {

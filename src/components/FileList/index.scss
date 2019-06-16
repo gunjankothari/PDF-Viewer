@@ -1,0 +1,15 @@
+
+.file-wrapper {
+  flex: 1 1 auto;
+  height: calc(100vh - 200px);
+  overflow: auto;
+
+  .label{
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.27);
+    text-transform: uppercase;
+    margin: 1.2rem 1.4rem 0;
+    padding: 0 2rem;
+    text-align: left;
+  }
+}
