@@ -21,12 +21,19 @@
     }
   }
 
+  .name-wrapper{
+    overflow: hidden;
+  }
   .name {
     font-weight: 600;
     font-size: 1.2rem;
     line-height: 2rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .description {
     font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.27);
   }
 }

@@ -1,6 +1,4 @@
 import React,{ PureComponent }  from 'react';
-import { Document, Page } from "react-pdf/dist/entry.webpack";
-
 import './index.scss';
 
 import FileItem from "../../components/FileItem";
@@ -8,12 +6,18 @@ import PDFViewer from "../../components/PDFViewer";
 
 import LOGO from "../../assets/images/logo.svg";
 import UPLOAD from "../../assets/images/upload.svg";
+import OPENER from "../../assets/images/open-menu-01-512.png";
+
+const Type = Object.freeze({
+    PDF : "application/pdf",
+    TEXT: "text/plain"
+});
 
 export default class HomePage extends PureComponent {
     state = {
-        fileLoaded: false,
         files: [],
-        fileSelectedIndex: 0
+        fileSelectedIndex: 0,
+        sidebarOpen: false
     };
 
     componentWillMount() {
@@ -24,27 +28,46 @@ export default class HomePage extends PureComponent {
         const input = event.target;
         const reader = new FileReader();
 
-        this.setState({
-            fileLoaded: false
-        });
-
         reader.onload = () => {
-            this.setState({
-                files: [
-                    ...this.state.files,
-                    {
-                        name: input.files[0].name,
-                        file: new Uint8Array(reader.result)
-                    }
-                ]
-            });
-            this.setState({
-                fileLoaded: true,
-                fileSelectedIndex: this.state.files.length - 1
-            });
-            //this.saveFile();
+            const file = input.files[0];
+            const type = input.files[0].type;
+            let fileData;
+            switch(type){
+                case Type.PDF:
+                    fileData = new Uint8Array(reader.result);
+                    break;
+
+                case Type.TEXT:
+                    fileData = this.atos(reader.result);
+                    break;
+
+                default :
+                    fileData = null;
+            }
+            if(fileData){
+                this.setState({
+                    files: [
+                        ...this.state.files,
+                        {
+                            name: file.name,
+                            file: fileData,
+                            type: type
+                        }
+                    ],
+
+                });
+                this.setState({
+                    fileSelectedIndex: this.state.files.length -1,
+                    sidebarOpen: false
+                })
+            }
         };
+        console.log(input.files[0]);
         reader.readAsArrayBuffer(input.files[0]);
+    }
+
+    atos(arrayBuffer){
+        return String.fromCharCode.apply(null, new Uint8Array((arrayBuffer)))
     }
 
     saveFile(){
@@ -59,22 +82,64 @@ export default class HomePage extends PureComponent {
     }
 
     loadPDF(index){
-        debugger;
-        console.log(index);
+        if(index > this.state.files.length - 1){
+            index = this.state.files.length - 1;
+        }
         this.setState({
             fileSelectedIndex: index
         });
     }
 
-    render() {
-        const { files, fileLoaded, fileSelectedIndex } = this.state;
-        let fileList = (<div>No Files Loaded yet.</div>)
-        if(files){
-            fileList = files.map((file,index) => (<FileItem key={index} name={file.name} onClick={()=>{ this.loadPDF(index) }}/>))
+    getContent(selectedFile){
+        if(selectedFile){
+            switch(selectedFile.type){
+                case Type.PDF:
+                    return (
+                        <div>
+                            <h4>{selectedFile.name}</h4>
+                            <PDFViewer file={{data: selectedFile.file}} />
+                        </div>
+                    );
+
+                case Type.TEXT:
+                    return (<div>
+                        <h4>{selectedFile.name}</h4>
+                        <pre>{selectedFile.file}</pre>
+                    </div>);
+            }
         }
+        return;
+    }
+
+    toggleSidebar(){
+        this.setState({
+            sidebarOpen: !this.state.sidebarOpen
+        })
+    }
+
+    render() {
+        const { files, fileSelectedIndex } = this.state;
+        let fileList = (<div>No Files Loaded yet.</div>);
+        const selectedFile = files[fileSelectedIndex];
+        if(files){
+            fileList = files.map((file,index) => (
+                <FileItem
+                    key={index}
+                    name={file.name}
+                    selected={index === fileSelectedIndex}
+                    onClick={()=>{ this.loadPDF(index) }}
+                />
+                )
+            )
+        }
+
+
         return (
             <div className="main">
-                <div className="sidebar">
+                <div className={ "sidebar " + (this.state.sidebarOpen ? "open" : "") }>
+                    <div className="sidebar-toogle" onClick={this.toggleSidebar.bind(this)} >
+                        <img src={OPENER} />
+                    </div>
                     <div className="logo">
                         <img src={LOGO} />
                     </div>
@@ -85,7 +150,7 @@ export default class HomePage extends PureComponent {
                         </div>
                     </div>
                     <div className="bottom">
-                        <input id="file-upload" type="file" accept="application/pdf" onChange={this.uploadFile.bind(this)}/>
+                        <input id="file-upload" type="file" accept="application/pdf, text/plain" onChange={this.uploadFile.bind(this)}/>
                         <label htmlFor="file-upload" className="file-upload-btn">
                             <img src={UPLOAD} />
                             <span>Upload Files</span>
@@ -93,7 +158,7 @@ export default class HomePage extends PureComponent {
                     </div>
                 </div>
                 <div className="container">
-                    { fileLoaded && <PDFViewer file={{ data: files[fileSelectedIndex].file }} /> }
+                    { this.getContent(selectedFile) }
                 </div>
             </div>
         );

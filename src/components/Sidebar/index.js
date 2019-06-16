@@ -15,100 +15,19 @@ const Type = Object.freeze({
 
 export default class HomePage extends PureComponent {
     state = {
-        files: [],
-        fileSelectedIndex: 0,
         sidebarOpen: false
     };
 
-    componentWillMount() {
-        //this.loadFiles();
-    }
-
     uploadFile(event){
-        const input = event.target;
-        const reader = new FileReader();
-
-        reader.onload = () => {
-            const file = input.files[0];
-            const type = input.files[0].type;
-            let fileData;
-            switch(type){
-                case Type.PDF:
-                    fileData = new Uint8Array(reader.result);
-                    break;
-
-                case Type.TEXT:
-                    fileData = this.atos(reader.result);
-                    break;
-
-                default :
-                    fileData = null;
-            }
-            if(fileData){
-                this.setState({
-                    files: [
-                        ...this.state.files,
-                        {
-                            name: file.name,
-                            file: fileData,
-                            type: type
-                        }
-                    ],
-
-                });
-                this.setState({
-                    fileSelectedIndex: this.state.files.length -1,
-                    sidebarOpen: false
-                })
-            }
-        };
-        console.log(input.files[0]);
-        reader.readAsArrayBuffer(input.files[0]);
-    }
-
-    atos(arrayBuffer){
-        return String.fromCharCode.apply(null, new Uint8Array((arrayBuffer)))
-    }
-
-    saveFile(){
-        localStorage.setItem("files",JSON.stringify(this.state.files));
-    }
-
-    loadFiles(){
-        const files = JSON.parse(localStorage.getItem("files"));
-        this.setState({
-            files: files || []
-        });
+        if(this.props.uploadFile) {
+            this.props.uploadFile(event);
+        }
     }
 
     loadPDF(index){
-        if(index > this.state.files.length - 1){
-            index = this.state.files.length - 1;
+        if(this.props.loadPDF){
+            this.props.loadPDF();
         }
-        this.setState({
-            fileSelectedIndex: index
-        });
-    }
-
-    getContent(selectedFile){
-        if(selectedFile){
-            switch(selectedFile.type){
-                case Type.PDF:
-                    return (
-                        <div>
-                            <h4>{selectedFile.name}</h4>
-                            <PDFViewer file={{data: selectedFile.file}} />
-                        </div>
-                    );
-
-                case Type.TEXT:
-                    return (<div>
-                        <h4>{selectedFile.name}</h4>
-                        <pre>{selectedFile.file}</pre>
-                    </div>);
-            }
-        }
-        return;
     }
 
     toggleSidebar(){
@@ -118,9 +37,11 @@ export default class HomePage extends PureComponent {
     }
 
     render() {
+
         const { files, fileSelectedIndex } = this.state;
+
         let fileList = (<div>No Files Loaded yet.</div>);
-        const selectedFile = files[fileSelectedIndex];
+
         if(files){
             fileList = files.map((file,index) => (
                     <FileItem
