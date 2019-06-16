@@ -1,0 +1,32 @@
+.file {
+  cursor: pointer;
+
+  .item{
+    margin: 10px 20px;
+    display: flex;
+    padding: 0.5rem;
+
+    &:first-child{
+      margin-top: 0;
+    }
+
+    .icon {
+      padding: 0.5rem 1.5rem;
+    }
+
+    &.selected, &:hover{
+      background: rgba(88,47,212,0.2);
+      box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+      border-radius: 15px;
+    }
+  }
+
+  .name {
+    font-weight: 600;
+    font-size: 1.2rem;
+    line-height: 2rem;
+  }
+  .description {
+    font-size: 0.8rem;
+  }
+}

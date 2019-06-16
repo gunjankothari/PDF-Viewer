@@ -1,0 +1,81 @@
+.main {
+  display: flex;
+  height: 100%;
+
+  .sidebar {
+    flex: 0 1 13%;
+    height: 100%;
+    background: #070D59;
+    min-width: 20rem;
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+
+    .logo {
+        width: 100%;
+        margin-top: 3rem;
+    }
+    .file-wrapper{
+      flex: 1 1 auto;
+    }
+
+    .bottom{
+      flex: 0 0 auto;
+      display: flex;
+    }
+    #file-upload{
+      display: none;
+    }
+    .file-upload-btn{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      color: white;
+      font-weight: bold;
+      background: #F7B633;
+      box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+      border-radius: 10px;
+      margin: 20px;
+      width: 100%;
+      padding: 5px 10px;
+      cursor: pointer;
+      span {
+        margin-left: 0.5rem;
+      }
+    }
+  }
+
+  .container {
+    flex: 1 1 auto;
+    height: 100%
+  }
+
+  .file-wrapper {
+
+    .label{
+      font-size: 1rem;
+      color: rgba(255, 255, 255, 0.27);
+      text-transform: uppercase;
+      margin: 1.2rem 1.4rem 0;
+      padding: 0 2rem;
+      text-align: left;
+    }
+  }
+}
+
+@media (min-width: 992px) {
+  .main {
+    display: flex;
+    height: 100vh;
+
+    .sidebar {
+      display: block;
+    }
+
+    .container {
+      flex: 1 1 auto;
+      height: 100%
+    }
+  }
+}
