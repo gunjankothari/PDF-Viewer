@@ -48,7 +48,8 @@
 
   .container {
     flex: 1 1 auto;
-    height: 100%
+    height: 100%;
+    overflow: auto;
   }
 
   .file-wrapper {

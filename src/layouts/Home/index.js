@@ -1,70 +1,87 @@
-import React,{PureComponent}  from 'react';
+import React,{ PureComponent }  from 'react';
+import { Document, Page } from "react-pdf/dist/entry.webpack";
+
 import './index.scss';
-import FileItem from "../../components/FileItem"
+
+import FileItem from "../../components/FileItem";
+import PDFViewer from "../../components/PDFViewer";
+
 import LOGO from "../../assets/images/logo.svg";
 import UPLOAD from "../../assets/images/upload.svg";
-import {Document, Page, pdfjs } from "react-pdf/dist/entry.webpack";
 
 export default class HomePage extends PureComponent {
-    constructor(props){
-        super(props);
-        this.state = {
-            fileLoaded: false,
-            numPages: null,
-            pageNumber: 0,
-        };
+    state = {
+        fileLoaded: false,
+        files: [],
+        fileSelectedIndex: 0
+    };
+
+    componentWillMount() {
+        //this.loadFiles();
     }
 
     uploadFile(event){
         const input = event.target;
-
         const reader = new FileReader();
+
+        this.setState({
+            fileLoaded: false
+        });
+
         reader.onload = () => {
-            this.file = { data: reader.result}
-            // this.file = new Uint8Array(reader.result);
-            // this.file = {data: reader.result};
-            // console.log(this.file);
-            const prom = pdfjs.getDocument({ data: new Uint8Array(reader.result)});
-            console.log(prom);
-            prom.then(pdf=> console.log(pdf))
-            this.setState({ fileLoaded: true });
+            this.setState({
+                files: [
+                    ...this.state.files,
+                    {
+                        name: input.files[0].name,
+                        file: new Uint8Array(reader.result)
+                    }
+                ]
+            });
+            this.setState({
+                fileLoaded: true,
+                fileSelectedIndex: this.state.files.length - 1
+            });
+            //this.saveFile();
         };
         reader.readAsArrayBuffer(input.files[0]);
     }
 
-    onLoadSuccess(pdf){
-        console.log('onDocumentLoad', pdf);
-        this.setState({ numPages: pdf.numPages });
+    saveFile(){
+        localStorage.setItem("files",JSON.stringify(this.state.files));
     }
 
-    onRenderSuccess(page){
-        console.log(page.originalHeight);
-    }
-    onPageLoadSucess(page){
-        console.log(page.originalHeight);
-    }
-    onRenderError(error){
-        console.error(error);
-    }
-    onPageLoadError(error){
-        console.error(error);
+    loadFiles(){
+        const files = JSON.parse(localStorage.getItem("files"));
+        this.setState({
+            files: files || []
+        });
     }
 
+    loadPDF(index){
+        debugger;
+        console.log(index);
+        this.setState({
+            fileSelectedIndex: index
+        });
+    }
 
     render() {
-        const { fileLoaded, numPages, pageNumber } = this.state;
+        const { files, fileLoaded, fileSelectedIndex } = this.state;
+        let fileList = (<div>No Files Loaded yet.</div>)
+        if(files){
+            fileList = files.map((file,index) => (<FileItem key={index} name={file.name} onClick={()=>{ this.loadPDF(index) }}/>))
+        }
         return (
             <div className="main">
                 <div className="sidebar">
                     <div className="logo">
-                        <img src={LOGO}/>
+                        <img src={LOGO} />
                     </div>
                     <div className="file-wrapper">
                         <div className="label">Files</div>
                         <div className="items">
-                            <FileItem></FileItem>
-                            <FileItem></FileItem>
-                            <FileItem></FileItem>
+                            {fileList}
                         </div>
                     </div>
                     <div className="bottom">
@@ -76,23 +93,9 @@ export default class HomePage extends PureComponent {
                     </div>
                 </div>
                 <div className="container">
-                    <div>Container</div>
-                    { fileLoaded &&
-                        <Document
-                            file={{ data: this.file }}
-                            onLoadSuccess={this.onLoadSuccess} >
-                            <Page
-                                pageIndex={pageNumber}
-                                onLoadSuccess={this.onPageLoadSucess}
-                                onRenderSuccess={this.onRenderSuccess}
-                                onRenderError={this.onRenderError}
-                                onLoadError={this.onPageLoadError}
-                            />
-                        </Document>
-                    }
+                    { fileLoaded && <PDFViewer file={{ data: files[fileSelectedIndex].file }} /> }
                 </div>
             </div>
-
         );
     }
 };
